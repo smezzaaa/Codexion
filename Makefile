@@ -5,39 +5,42 @@
 #                                                     +:+ +:+         +:+      #
 #    By: smeza-ro <smeza-ro@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2026/07/01 19:28:31 by smeza-ro          #+#    #+#              #
-#    Updated: 2026/07/01 19:40:54 by smeza-ro         ###   ########.fr        #
+#    Created: 2026/07/06 12:31:35 by smeza-ro          #+#    #+#              #
+#    Updated: 2026/07/08 16:16:56 by smeza-ro         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME = codexion
 
-CC = cc
-CFLAGS = -Wall -Wextra -Werror
+NAME		= codexion
 
-SRCS = main.c utils.c
-BONUS_SRCS = main_bonus.c utils_bonus.c
+CC			= cc
+CFLAGS		= -Wall -Wextra -Werror
+LDFLAGS		= -lpthread
 
-OBJS = $(SRCS:.c=.o)
-BONUS_OBJS = $(BONUS_SRCS:.c=.o)
+SRCS		= main.c \
+			  initializer.c \
+			  safety_module.c \
+			  utils.c edge_case.c \
+			  actions.c \
+
+OBJS		= $(SRCS:.c=.o)
+
+HEADER		= codexion.h
+
+%.o: %.c $(HEADER)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(NAME): $(OBJS)
+	$(CC) $(CFLAGS) $(OBJS) $(LDFLAGS) -o $(NAME)
 
 all: $(NAME)
 
-$(NAME): $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
-
-%.o: %.c codexion.h
-	$(CC) $(CFLAGS) -c $< -o $@
-
-bonus: $(OBJS) $(BONUS_OBJS)
-	$(CC) $(CFLAGS) $(OBJS) $(BONUS_OBJS) -o $(NAME)
-
 clean:
-	$(RM) $(OBJS) $(BONUS_OBJS)
+	rm -f $(OBJS)
 
 fclean: clean
-	$(RM) $(NAME)
+	rm -f $(NAME)
 
 re: fclean all
 
-.PHONY: all bonus clean fclean re
+.PHONY: all clean fclean re
