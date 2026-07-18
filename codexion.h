@@ -6,7 +6,7 @@
 /*   By: smeza-ro <smeza-ro@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/01 18:47:24 by smeza-ro          #+#    #+#             */
-/*   Updated: 2026/07/08 16:11:15 by smeza-ro         ###   ########.fr       */
+/*   Updated: 2026/07/18 19:24:30 by smeza-ro         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@
 
 typedef struct heap
 {
-	int	*arr;
+	int		*arr;
 	int		size;
 	int		capacity;
 }	heap;
@@ -32,7 +32,7 @@ typedef struct s_dongle
 	pthread_mutex_t	m; // per proteggere l'esecuzione
 	pthread_cond_t	c; // per proteggere l'esecuzione
 	int 			last_release; // per monitorare cooldown
-	heap			priority_queue;
+	heap			*priority_queue;
 	int				taken;
 }	t_dongle;
 
@@ -44,6 +44,8 @@ typedef struct s_coder
 	t_dongle	*l_dongle;
 	t_dongle	*r_dongle;
 	pthread_t	t;
+	int			heap_pos;
+	t_quantum_compiler	*qc;
 }	t_coder;
 
 typedef struct s_quantum_compiler
@@ -72,7 +74,7 @@ void	dongle_initializer(t_quantum_compiler *qc);
 void	coder_initializer(t_quantum_compiler *qc);
 void	ft_cleanup(t_quantum_compiler *qc);
 void	*one_coder_monitor(void *arg);
-void	*coder_monitor(void *arg);
-
+void	create_coders(t_quantum_compiler *qc);
+void	*coder_routine(void *arg);
 
 #endif

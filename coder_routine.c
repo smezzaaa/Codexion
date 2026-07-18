@@ -1,31 +1,32 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   coder_routine.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: smeza-ro <smeza-ro@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/07/01 19:19:15 by smeza-ro          #+#    #+#             */
-/*   Updated: 2026/07/18 18:37:38 by smeza-ro         ###   ########.fr       */
+/*   Created: 2026/07/18 17:14:00 by smeza-ro          #+#    #+#             */
+/*   Updated: 2026/07/18 19:29:34 by smeza-ro         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
-int main(int ac, char **av)
+void	*coder_routine(void *arg)
 {
-    if (ac != 9)
-        return(write(1, "[ERROR] Invalid Number of Arguments\n", 37));
-    if (!input_checker(av))
-		return(write(1, "[WARNING] Invalid Input!\n", 26));
-	t_quantum_compiler	qc;
-	pthread_t	monitor;
+	t_coder	*coder;
+	t_dongle	*r_d;
+	t_dongle	*l_d;
 
-	qc_initializer(&qc, av);
-	if (qc.number_of_coders == 1)
+	coder = (t_coder *)(arg);
+	r_d = coder->r_dongle;
+	l_d = coder->l_dongle;
+	pthread_mutex_lock(&coder->r_dongle);
+	while (coder->heap_pos != 1) // aggiungere un'altra heap pos sia per sinistro che per destro
 	{
-		pthread_create(&monitor, NULL, one_coder_monitor, &qc);
-		pthread_join(monitor, NULL);
+		send_request(coder);
+		pthread_cond_wait(r_dongle->c)
 	}
-	create_coders(&qc);
+		
+	
 }

@@ -1,31 +1,37 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   create_coders.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: smeza-ro <smeza-ro@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/07/01 19:19:15 by smeza-ro          #+#    #+#             */
-/*   Updated: 2026/07/18 18:37:38 by smeza-ro         ###   ########.fr       */
+/*   Created: 2026/07/18 18:39:29 by smeza-ro          #+#    #+#             */
+/*   Updated: 2026/07/18 18:59:09 by smeza-ro         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
-int main(int ac, char **av)
+void	create_coders(t_quantum_compiler *qc)
 {
-    if (ac != 9)
-        return(write(1, "[ERROR] Invalid Number of Arguments\n", 37));
-    if (!input_checker(av))
-		return(write(1, "[WARNING] Invalid Input!\n", 26));
-	t_quantum_compiler	qc;
-	pthread_t	monitor;
+	int	i;
+	t_coder	*curr;
+	pthread_t	t;
 
-	qc_initializer(&qc, av);
-	if (qc.number_of_coders == 1)
+	i = 0;
+	while(i < qc->number_of_coders)
 	{
-		pthread_create(&monitor, NULL, one_coder_monitor, &qc);
-		pthread_join(monitor, NULL);
+		curr = qc->coders + i;
+		t = curr->t;
+		pthread_create(&t, NULL, coder_routine, curr);
+		i++;
 	}
-	create_coders(&qc);
+	i = 0;
+	while(i < qc->number_of_coders)
+	{
+		curr = qc->coders + i;
+		t = curr->t;
+		pthread_join(&t, NULL);
+		i++;
+	}
 }

@@ -6,7 +6,7 @@
 /*   By: smeza-ro <smeza-ro@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/04 17:09:42 by smeza-ro          #+#    #+#             */
-/*   Updated: 2026/07/08 15:19:31 by smeza-ro         ###   ########.fr       */
+/*   Updated: 2026/07/18 19:24:08 by smeza-ro         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,8 @@ void	coder_initializer(t_quantum_compiler *qc)
 		curr->id = i + 1;
 		curr->last_compile = 0;
 		curr->counter = 0;
+		curr->heap_pos = -1;
+		curr->qc = &qc;
 		i++;
 	}
 	if (qc->number_of_coders == 1)

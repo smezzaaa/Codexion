@@ -6,29 +6,39 @@
 /*   By: smeza-ro <smeza-ro@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/06 14:51:43 by smeza-ro          #+#    #+#             */
-/*   Updated: 2026/07/16 18:21:44 by smeza-ro         ###   ########.fr       */
+/*   Updated: 2026/07/17 20:22:05 by smeza-ro         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
-void	dongle_cooldown(int cooldown)
+void	dongle_cooldown(int cooldown, int start, t_dongle *d)
 {
+	d->taken = -1;
 	if (usleep((cooldown) * 1000) != 0)
 		return;
+	d->taken = 0;
+	d->last_release = gettime();
 }
 
-int	gettime()
+long	gettime()
 {
 	struct timeval		tv;
 	if (gettimeofday(&tv, NULL) != 0)
 		return (-1);
-	return(tv.tv_usec);
+	return((long int)(tv.tv_usec));
 }
 
-heap	*update_pq(t_coder cod, t_quantum_compiler qc)
+heap	*dongle_request(t_dongle *dongle, t_coder *cod, t_quantum_compiler *qc)
 {
-	
+	int	request_time;
+
+	request_time = 0;
+	if (qc->scheduler == "fifo")
+	{
+		request_time = cod->last_compile - gettime();
+		if (dongle->last_release )
+	}
 }
 
 static void	*coder_routine(void *arg)
@@ -41,8 +51,10 @@ static void	*coder_routine(void *arg)
 
 	lap = 0;
 	qc = (t_quantum_compiler *)(arg);
-	while(coder->counter <= qc->number_of_compiles_required)
+	while(coder->counter <= qc->number_of_compiles_required && qc->stop_flag == 0)
 	{
+		dongle_request(coder->r_dongle, coder, qc);
+		if (coder->id == coder->r_dongle->priority_queue[0])
 		pthread_mutex_lock(&coder->r_dongle->m);
 		start = gettime();
 		if (start < 0)
@@ -68,15 +80,16 @@ static void	*coder_routine(void *arg)
 			return NULL;
 		lap += (end - start) * 1000;
 		coder->last_compile = lap;
+		coder->r_dongle->last_release = gettime();
 		coder->counter += 1;
 		if (coder->last_compile >= qc->time_to_burnout)
 		{
 			qc->stop_flag = -1;
 			printf("%d %d burned out\n", lap, coder->id);
-			break;
 		}
 		pthread_mutex_unlock(&coder->r_dongle->m);
-		dongle_cooldown(qc->dongle_cooldown);
+		dongle_cooldown(qc->dongle_cooldown, coder->l_dongle->last_release, coder->l_dongle);
+		dongle_cooldown(qc->dongle_cooldown, coder->r_dongle->last_release, coder->r_dongle);
 	}
 	return (NULL);
 }
@@ -89,13 +102,20 @@ void	*coder_monitor(void *arg)
 
 	i = 0;
 	qc = (t_quantum_compiler *)(arg);
-	while (i < qc->number_of_coders)
+	while (qc->stop_flag != -1)
 	{
-		coder = qc->coders + i;
-		pthread_create(&coder->t, NULL, coder_routine, qc);
-		pthread_join(coder->t, NULL);
-		i++;
+		while (i < qc->number_of_coders)
+		{
+			coder = qc->coders + i;
+			pthread_create(&coder->t, NULL, coder_routine, qc);
+			pthread_join(coder->t, NULL);
+			i++;
+		}
+		if (qc->stop_flag == -1)
+		{
+			ft_cleanup(qc);
+			return(NULL);
+		}
 	}
-	ft_cleanup(qc);
 	return (NULL);
 }
